@@ -21,6 +21,7 @@ If you encounter this problem, please open an issue. I haven't checked what caus
 Credit goes to @1000001101000 for https://github.com/1000001101000/Debian_on_Intel_Terastations/
 
 ---
+## Preface
 
 The released version is a prerelease, however it should be suitable for production use. The difference between this prerelease and the intended final product will be automation of certain tasks which usually require manual work, namely:
 - LCDProc for LCD control
@@ -31,6 +32,7 @@ The final installer will also have some useful features like displaying the IP a
 
 ---
 
+## Installation
 To use the latest prerelease, you will want to write (balena Etcher, Win32DiskImager, DD etc) the ISO image to a USB drive and insert it into any of the ports on the back of your DX4000.
 
 Avoid using Rufus to write the image unless you know what you're doing (you need to write raw instead of letting Rufus install a bootloader). Using Rufus without disabling its "assistive" bootloader features will cause incorrect parameters to be specified to boot the installer, resulting in the installer USB not working, or even more likely, it working but the emergency serial console being disabled both on the installer and in the final Debian installation, since the final installation appears to be affected by the installer's boot parameters.
@@ -39,23 +41,26 @@ With the DX4000 powered down but plugged in, hold the reset button on the back (
 
 The LCD will stay on Loading Recovery for the remainder of the installation as there is no software in the installer to drive the LCD at this time.
 
-Use a tool like Advanced IP Scanner or NMAP to scan your network for the DX4000. It should automatically retrieve an IP address when it has fully started.
+Use your router's IP lease page or a tool like Advanced IP Scanner or NMAP to scan your network for the DX4000. It should automatically retrieve an IP address when it has fully started.
 
-Connect via SSH to the IP address of the DX4000 using the SSH CLI or a tool like PuTTY or RoyalTS.
+Connect via SSH to the IP address of the DX4000 using the SSH CLI or a tool like PuTTY or your OS's native SSH client. If you do not get a connection immediately, it could take up to 15 minutes for the SSH server to start.
 
 When asked for the details to log in, the username is `installer` and the password is `dx4000`
 
-NOTE: Make sure to enable SSH Server and basic system utilities when prompted to select software. You should probably disable the graphical desktop environment too, as the DX4000 has not video output and will just waste resources. You may wish to install a graphical environment and use VNC or XDRP later.
+NOTE: Make sure to enable SSH Server and basic system utilities when prompted to select software. You should probably disable the graphical desktop environment too, as the DX4000 has not video output and will just waste resources. You may wish to install a graphical environment and use VNC, XRDP or X2Go later.
 
 ---
 
+## Post Installation
 After the install is complete, the system will fail to boot. You must press and hold the reset button again to boot the installer. Log back in.
 
 Go to the bottom of the action list and choose Start shell.
 
 Run the `disk-detect` command to ensure all disk device nodes have been populated.
 
-Mount your installation's boot partition (usually the very first partition on the newly installed disk) and copy `startup.nsh` from the root of the installer USB to the root of your boot partition. You may now reboot and the system should come online on it's own.
+Ensure the FAT kernel module is loaded with `modprobe vfat` otherwise mount attempts will fail with "Invalid Argument".
+
+Mount your installation's boot partition (usually the very first partition on the newly installed disk) and copy `startup.nsh` from the root of the installer USB to the root of your boot partition. You may now reboot and the system should come online on its own.
 
 ---
 
@@ -65,3 +70,4 @@ Notes:
 - If you had a stock Windows installation RAID, it should be possible to retain this as MDADM should detect it an use it, as MDADM appears to support Intel Rapid RAID.
 - You will need to follow the old guide (the soldered install one, but don't worry, no soldering needed!) for the Fan and LCD setup. Find it at https://github.com/alexhorner/WD-DX4000 .
 - If you have soldered wires to your DX4000 and want to use the serial console for the install instead of SSH, this has been enabled for you. Soldering to access the serial port is COMPLETELY OPTIONAL for this installer, as this installer is intended to work without even opening your DX4000's cover.
+
