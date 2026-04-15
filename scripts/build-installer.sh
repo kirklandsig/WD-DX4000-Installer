@@ -1,6 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
+repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+
 usage() {
     cat <<'EOF'
 Usage:
@@ -193,6 +195,7 @@ verify_installer_iso
 
 patch_preseed
 cp "$template_dir/startup.nsh" "$payload_dir/"
+cp "$repo_root/scripts/installer-postinstall.sh" "$payload_dir/dx4000-postinstall.sh"
 
 xorriso -osirrox on -indev "$debian_files_dir/mini.iso" -extract / "$iso_dir"
 cp "$iso_dir/initrd.gz" "$work_initrd_gz"

@@ -101,15 +101,16 @@ NOTE: Make sure to enable SSH Server and basic system utilities when prompted to
 ---
 
 ## Post Installation
-After the install is complete, the system will fail to boot. You must press and hold the reset button again to boot the installer. Log back in.
+Current builds in this repository attempt to automate the DX4000 boot fix during Debian's installer `late_command` by copying `startup.nsh` onto the installed system's EFI System Partition before the installer exits.
 
-Go to the bottom of the action list and choose Start shell.
+If the system still fails to boot after install, use the manual fallback:
 
-Run the `disk-detect` command to ensure all disk device nodes have been populated.
-
-Ensure the FAT kernel module is loaded with `modprobe vfat` otherwise mount attempts will fail with "Invalid Argument".
-
-Mount your installation's boot partition (usually the very first partition on the newly installed disk) and copy `startup.nsh` from the root of the installer USB to the root of your boot partition. You may now reboot and the system should come online on its own.
+1. Press and hold the reset button again to boot the installer and log back in.
+2. Go to the bottom of the action list and choose Start shell.
+3. Run `disk-detect` to ensure all disk device nodes have been populated.
+4. Ensure the FAT kernel module is loaded with `modprobe vfat` otherwise mount attempts can fail with `Invalid Argument`.
+5. Mount your installation's boot partition (usually the first partition on the installed disk) and copy `startup.nsh` from the installer environment to the root of that boot partition.
+6. Reboot and the system should come online on its own.
 
 ---
 
