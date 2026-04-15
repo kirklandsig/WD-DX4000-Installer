@@ -16,6 +16,10 @@ Environment:
 
   DX4000_AUTHORIZED_KEYS_URL
     Optional URL to an authorized_keys file for Debian network-console.
+
+  DX4000_BUILD_WORKDIR
+    Optional Linux filesystem path to use for temporary build files. If omitted,
+    the script builds under a temporary directory in /tmp.
 EOF
 }
 
@@ -30,6 +34,10 @@ cleanup() {
 
     rm -rf -- "$efi_mount_dir" "$iso_dir"
     rm -f "$work_initrd" "$work_initrd_gz" "$efi_img"
+
+    if [ "$cleanup_build_root" -eq 1 ]; then
+        rm -rf -- "$build_root"
+    fi
 }
 
 require_root() {
@@ -41,7 +49,7 @@ require_root() {
 
 require_commands() {
     local cmd
-    for cmd in awk cpio gunzip gzip mount mountpoint od sed sha256sum umount wget xorriso; do
+    for cmd in awk cpio gunzip gzip mktemp mount mountpoint od sed sha256sum umount wget xorriso; do
         if ! command -v "$cmd" >/dev/null 2>&1; then
             echo "missing required command: $cmd"
             exit 1
@@ -51,16 +59,17 @@ require_commands() {
 
 download_installer_assets() {
     local netboot_url="$installer_base_url/dists/$distro/main/installer-amd64/current/images/netboot"
+    local images_url="$installer_base_url/dists/$distro/main/installer-amd64/current/images"
 
     wget -O "$debian_files_dir/mini.iso" "$netboot_url/mini.iso"
-    wget -O "$debian_files_dir/SHA256SUMS" "$netboot_url/SHA256SUMS"
+    wget -O "$debian_files_dir/SHA256SUMS" "$images_url/SHA256SUMS"
 }
 
 verify_installer_iso() {
     local checksum_file="$debian_files_dir/mini.iso.sha256"
 
     awk '
-        $2 == "./mini.iso" || $2 == "mini.iso" {
+        $2 == "./netboot/mini.iso" || $2 == "netboot/mini.iso" || $2 == "./mini.iso" || $2 == "mini.iso" {
             print $1 "  mini.iso"
             found = 1
         }
@@ -138,14 +147,9 @@ if [ -z "$template_dir" ] || [ -z "$distro" ] || [ -z "$installer_base_url" ]; t
 fi
 
 template_dir="$(cd -- "$template_dir" && pwd)"
-debian_files_dir="$template_dir/debian-files"
 output_dir="$template_dir/output"
-payload_dir="$template_dir/payload"
-iso_dir="$template_dir/iso"
-efi_mount_dir="$template_dir/efimount"
-work_initrd="$template_dir/initrd"
-work_initrd_gz="$template_dir/initrd.gz"
-efi_img="$template_dir/efi.img"
+build_root="${DX4000_BUILD_WORKDIR:-}"
+cleanup_build_root=0
 
 installer_secret="${DX4000_INSTALLER_PASSWORD:-}"
 authorized_keys_url="${DX4000_AUTHORIZED_KEYS_URL:-}"
@@ -162,11 +166,24 @@ fi
 installer_secret_escaped="$(escape_sed_replacement "$installer_secret")"
 authorized_keys_url_escaped="$(escape_sed_replacement "$authorized_keys_url")"
 
+if [ -z "$build_root" ]; then
+    build_root="$(mktemp -d "/tmp/dx4000-$distro-XXXXXX")"
+    cleanup_build_root=1
+else
+    mkdir -p "$build_root"
+fi
+
+debian_files_dir="$build_root/debian-files"
+payload_dir="$build_root/payload"
+iso_dir="$build_root/iso"
+efi_mount_dir="$build_root/efimount"
+work_initrd="$build_root/initrd"
+work_initrd_gz="$build_root/initrd.gz"
+efi_img="$build_root/efi.img"
+
 trap cleanup EXIT
 
 mkdir -p "$debian_files_dir" "$output_dir"
-rm -rf -- "$iso_dir" "$efi_mount_dir"
-rm -f "$work_initrd" "$work_initrd_gz" "$efi_img"
 rm -rf -- "$payload_dir"
 mkdir -p "$payload_dir/source"
 rm -rf -- "$debian_files_dir/tmp"

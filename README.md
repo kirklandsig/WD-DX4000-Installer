@@ -46,6 +46,8 @@ sudo apt-get install -y bash coreutils cpio gzip mount wget xorriso
 
 The build downloads Debian's `mini.iso` and its `SHA256SUMS` file, then verifies the ISO checksum before rebuilding the installer image.
 
+When run from WSL against a repository checked out under `/mnt/c`, the build automatically stages its temporary files inside the Linux filesystem and only writes the final ISO and credentials file back to `output/`.
+
 To build the newest template in this repository:
 
 ```bash
