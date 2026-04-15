@@ -3,7 +3,7 @@
 
 Work In Progress
 
-# Please use the prebuilt ISOs under Releases if you don't know what you're doing. If you do know what you're doing and want to use the scripts to assemble your own images, please test the prebuilt ISOs before reporting issues, and include the results! https://github.com/alexhorner/WD-DX4000-Installer/tags
+# Please use the prebuilt ISOs under Releases if you don't know what you're doing. If you do know what you're doing and want to use the scripts to assemble your own images, please test the prebuilt ISOs before reporting issues, and include the results! https://github.com/alexhorner/WD-DX4000-Installer/releases
 
 ---
 
@@ -30,6 +30,49 @@ The released version is a prerelease, however it should be suitable for producti
 
 The final installer will also have some useful features like displaying the IP address on the network on the LCD during the installer and showing the current installer status too.
 
+The repository currently includes installer templates for `Buster`, `Bullseye`, `Bookworm`, and `Trixie`. If you want the newest template in this repository, use `Trixie/`.
+
+---
+
+## Building An ISO
+These scripts are intended to be run from Linux as `root`, as they use `mount`, `cpio`, and `xorriso` to rebuild Debian's netboot `mini.iso`.
+
+Build dependencies:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y bash coreutils cpio gzip mount wget xorriso
+```
+
+The build downloads Debian's `mini.iso` and its `SHA256SUMS` file, then verifies the ISO checksum before rebuilding the installer image.
+
+To build the newest template in this repository:
+
+```bash
+cd Trixie
+sudo ./generate_images.sh
+```
+
+The output image will be written to `Trixie/output/dx4000-trixie-installer.iso`.
+
+By default, each build now generates a unique SSH secret for the installer and writes it to `output/dx4000-<distro>-installer.credentials.txt`.
+
+If you want to control that yourself, you can override it at build time:
+
+```bash
+cd Trixie
+sudo DX4000_INSTALLER_PASSWORD='replace-this' ./generate_images.sh
+```
+
+You can also expose an SSH public key URL for the Debian network-console installer:
+
+```bash
+cd Trixie
+sudo DX4000_AUTHORIZED_KEYS_URL='https://example.com/authorized_keys' ./generate_images.sh
+```
+
+If you want the lower-risk Debian base for a Plex deployment on old hardware, build `Bookworm/` instead of `Trixie/`.
+
 ---
 
 ## Installation
@@ -45,7 +88,11 @@ Use your router's IP lease page or a tool like Advanced IP Scanner or NMAP to sc
 
 Connect via SSH to the IP address of the DX4000 using the SSH CLI or a tool like PuTTY or your OS's native SSH client. If you do not get a connection immediately, it could take up to 15 minutes for the SSH server to start.
 
-When asked for the details to log in, the username is `installer` and the password is `dx4000`
+When asked for the details to log in, the username is `installer`.
+
+If you are using an upstream prebuilt ISO, the password may still be `dx4000`.
+
+If you built the ISO yourself with the current scripts in this repository, use the installer secret written to `output/dx4000-<distro>-installer.credentials.txt` as the SSH password.
 
 NOTE: Make sure to enable SSH Server and basic system utilities when prompted to select software. You should probably disable the graphical desktop environment too, as the DX4000 has not video output and will just waste resources. You may wish to install a graphical environment and use VNC, XRDP or X2Go later.
 
@@ -64,10 +111,20 @@ Mount your installation's boot partition (usually the very first partition on th
 
 ---
 
+## Plex Bootstrap
+Once Debian is installed and booting normally, the repository includes a helper script to install Plex Media Server from Plex's official apt repository:
+
+```bash
+sudo ./scripts/bootstrap_plex.sh
+```
+
+After Plex is installed, open `http://<dx4000-ip>:32400/web` and complete the initial setup.
+
+---
+
 Notes:
 
 - If you have existing data on your DX4000, please take a backup. I am not liable for any data loss you endure as a result of using this software.
 - If you had a stock Windows installation RAID, it should be possible to retain this as MDADM should detect it an use it, as MDADM appears to support Intel Rapid RAID.
 - You will need to follow the old guide (the soldered install one, but don't worry, no soldering needed!) for the Fan and LCD setup. Find it at https://github.com/alexhorner/WD-DX4000 .
 - If you have soldered wires to your DX4000 and want to use the serial console for the install instead of SSH, this has been enabled for you. Soldering to access the serial port is COMPLETELY OPTIONAL for this installer, as this installer is intended to work without even opening your DX4000's cover.
-

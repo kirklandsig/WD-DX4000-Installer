@@ -1,0 +1,8 @@
+**/debian-files/
+**/output/
+**/payload/
+**/iso/
+**/efimount/
+**/initrd
+**/initrd.gz
+**/efi.img
