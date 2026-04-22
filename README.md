@@ -75,6 +75,8 @@ sudo DX4000_AUTHORIZED_KEYS_URL='https://example.com/authorized_keys' ./generate
 
 If you want the lower-risk Debian base for a Plex deployment on old hardware, build `Bookworm/` instead of `Trixie/`.
 
+This fork can publish known-good installer builds through GitHub Releases instead of tracking large ISO artifacts in git. The matching credentials file is intentionally not tracked.
+
 ---
 
 ## Installation
@@ -122,6 +124,54 @@ sudo ./scripts/bootstrap_plex.sh
 ```
 
 After Plex is installed, open `http://<dx4000-ip>:32400/web` and complete the initial setup.
+
+---
+
+## SMB / Samba Bootstrap
+For a Windows-friendly media workflow, the repository also includes a helper script to install and configure Samba with a simple authenticated media share:
+
+```bash
+sudo ./scripts/bootstrap_samba.sh --user <linux-user>
+```
+
+By default, the script creates:
+
+- `/srv/media/movies`
+- `/srv/media/tv`
+- `/srv/media/music`
+- `/srv/media/homevideos`
+- `/srv/downloads`
+
+The default Windows share path will be:
+
+```text
+\\<dx4000-ip>\media
+```
+
+Plex can then be pointed at the same `/srv/media/*` folders.
+
+---
+
+## CasaOS
+If you want a friendlier web management UI on top of Debian, the repository also includes a helper to install CasaOS:
+
+```bash
+sudo ./scripts/bootstrap_casaos.sh
+```
+
+CasaOS is optional. It layers on top of Debian and can coexist with manually configured services like Plex and Samba.
+
+After install, open:
+
+```text
+http://<dx4000-ip>/
+```
+
+If you later decide not to keep CasaOS, remove it with:
+
+```bash
+sudo casaos-uninstall
+```
 
 ---
 
