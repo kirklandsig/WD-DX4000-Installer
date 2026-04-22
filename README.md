@@ -3,7 +3,7 @@
 
 Work In Progress
 
-# Please use the prebuilt ISOs under Releases if you don't know what you're doing. If you do know what you're doing and want to use the scripts to assemble your own images, please test the prebuilt ISOs before reporting issues, and include the results! https://github.com/alexhorner/WD-DX4000-Installer/releases
+# Please use the prebuilt ISOs under [Releases](https://github.com/kirklandsig/WD-DX4000-Installer/releases) if you don't know what you're doing. If you do know what you're doing and want to use the scripts to assemble your own images, please test the prebuilt ISOs before reporting issues, and include the results.
 
 ---
 
@@ -75,7 +75,7 @@ sudo DX4000_AUTHORIZED_KEYS_URL='https://example.com/authorized_keys' ./generate
 
 If you want the lower-risk Debian base for a Plex deployment on old hardware, build `Bookworm/` instead of `Trixie/`.
 
-This fork can publish known-good installer builds through GitHub Releases instead of tracking large ISO artifacts in git. The matching credentials file is intentionally not tracked.
+This fork publishes known-good installer builds through [GitHub Releases](https://github.com/kirklandsig/WD-DX4000-Installer/releases) instead of tracking large ISO artifacts in git. The matching installer credentials file can also be published, but this fork leaves it out by default because the installer secret is temporary and publishing it is usually unnecessary.
 
 ---
 
