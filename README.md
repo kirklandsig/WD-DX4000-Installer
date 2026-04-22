@@ -75,7 +75,7 @@ sudo DX4000_AUTHORIZED_KEYS_URL='https://example.com/authorized_keys' ./generate
 
 If you want the lower-risk Debian base for a Plex deployment on old hardware, build `Bookworm/` instead of `Trixie/`.
 
-This fork publishes known-good installer builds through [GitHub Releases](https://github.com/kirklandsig/WD-DX4000-Installer/releases) instead of tracking large ISO artifacts in git. The matching installer credentials file can also be published, but this fork leaves it out by default because the installer secret is temporary and publishing it is usually unnecessary.
+This fork publishes known-good installer builds through [GitHub Releases](https://github.com/kirklandsig/WD-DX4000-Installer/releases) instead of tracking large ISO artifacts in git. Release assets may also include the matching temporary installer credentials file so people can use a prebuilt image without rebuilding it first, although generating your own installer secret is still preferred.
 
 ---
 
@@ -95,6 +95,8 @@ Connect via SSH to the IP address of the DX4000 using the SSH CLI or a tool like
 When asked for the details to log in, the username is `installer`.
 
 If you are using an upstream prebuilt ISO, the password may still be `dx4000`.
+
+If you are using a prebuilt release from this fork and the release includes `dx4000-<distro>-installer.credentials.txt`, use the `installer_secret` value from that file as the SSH password.
 
 If you built the ISO yourself with the current scripts in this repository, use the installer secret written to `output/dx4000-<distro>-installer.credentials.txt` as the SSH password.
 
